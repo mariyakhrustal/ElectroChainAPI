@@ -2,6 +2,11 @@ from django.db import models
 
 
 class Network(models.Model):
+    """
+    Представляет звено торговой сети электроники.
+    Уровень (level) рассчитывается автоматически в методе save() на основе иерархии поставщиков.
+    """
+
     name = models.CharField(
         max_length=350, help_text="Введите название звена сети", verbose_name="Название звена сети"
     )
@@ -23,6 +28,7 @@ class Network(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True, help_text="Укажите время создания", verbose_name="Время создания"
     )
+    level = models.PositiveIntegerField(editable=False, default=0, verbose_name="Уровень поставщика в иерархии")
 
     def __str__(self):
         return f"{self.name}"
@@ -31,8 +37,21 @@ class Network(models.Model):
         verbose_name = "Звено сети"
         verbose_name_plural = "Звенья сети"
 
+    def save(self, *args, **kwargs):
+        """
+        Рассчитывает уровень иерархии перед сохранением:
+        если поставщик отсутствует — уровень 0, иначе уровень поставщика + 1.
+        """
+        if self.supplier:
+            self.level = self.supplier.level + 1
+        else:
+            self.level = 0
+        super().save(*args, **kwargs)
+
 
 class Contact(models.Model):
+    """Представляет контактные данные звена торговой сети электроники."""
+
     email = models.EmailField(max_length=150, help_text="Введите почту", verbose_name="Почта")
     country = models.CharField(max_length=100, help_text="Введите страну", verbose_name="Страна")
     city = models.CharField(max_length=100, help_text="Введите город", verbose_name="Город")
@@ -55,6 +74,8 @@ class Contact(models.Model):
 
 
 class Product(models.Model):
+    """Представляет товар звена торговой сети электроники."""
+
     name = models.CharField(max_length=350, help_text="Введите название продукта", verbose_name="Название продукта")
     model = models.CharField(
         max_length=350, help_text="Введите модель продукта", verbose_name="Название модели продукта"
