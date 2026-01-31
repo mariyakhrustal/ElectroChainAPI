@@ -22,12 +22,11 @@ class Network(models.Model):
     debt = models.DecimalField(
         max_digits=12,
         decimal_places=2,
+        default=0,
         help_text="Укажите задолженность перед поставщиком",
         verbose_name="Задолженность перед поставщиком",
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True, help_text="Укажите время создания", verbose_name="Время создания"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     level = models.PositiveIntegerField(editable=False, default=0, verbose_name="Уровень поставщика в иерархии")
 
     def __str__(self):
